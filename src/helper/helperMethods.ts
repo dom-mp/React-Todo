@@ -193,15 +193,31 @@ function matchesId(id: number) {
 }
 
 function sortTodos(todos: TodoItem[]) {
-  todos.sort((a, b) => {
-    if (Number(a.year) !== Number(b.year)) return Number(b.year) - Number(a.year);
-    return Number(b.month) - Number(a.month);
-  }).sort((a, _) => {
-    if (a.completed) return 1;
-    return -1;
-  })
+  return todos.sort((a, b) => {
+    const getGroup = (item: TodoItem): number => {
+      const hasDate = item.year && item.month;
+      if (!item.completed && hasDate) return 1;
+      if (!item.completed && !hasDate) return 2;
+      if (item.completed && hasDate) return 3;
+      return 4;
+    };
 
-  return todos;
+    const groupA = getGroup(a);
+    const groupB = getGroup(b);
+
+    if (groupA !== groupB) return groupA - groupB;
+
+    const hasDateA = a.year && a.month;
+    const hasDateB = b.year && b.month;
+
+    if (hasDateA && hasDateB) {
+      const dateA = new Date(`${a.year}-${a.month}-01`);
+      const dateB = new Date(`${b.year}-${b.month}-01`);
+      return dateA.getTime() - dateB.getTime();
+    }
+
+    return 0;
+  });
 }
 
 export default {
